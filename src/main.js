@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const { pathToFileURL } = require('url');
+const fs = require('fs');
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -44,6 +45,16 @@ ipcMain.handle('dosya-sec', async () => {
   if (r.canceled || !r.filePaths[0]) return null;
   const p = r.filePaths[0];
   return { url: pathToFileURL(p).href, ad: path.basename(p) };
+});
+
+ipcMain.handle('not-kaydet', async (_e, metin, ad) => {
+  const r = await dialog.showSaveDialog({
+    defaultPath: (ad || 'not') + '.txt',
+    filters: [{ name: 'Metin dosyası', extensions: ['txt'] }]
+  });
+  if (r.canceled || !r.filePath) return null;
+  fs.writeFileSync(r.filePath, metin, 'utf8');
+  return r.filePath;
 });
 
 app.whenReady().then(() => {

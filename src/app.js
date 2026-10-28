@@ -1,4 +1,8 @@
 const alan = document.getElementById('alan');
+if (!window.api) {
+  document.body.insertAdjacentHTML('afterbegin',
+    '<div style="background:#ff6b6b;color:#fff;padding:8px 14px">Bu sayfa tarayıcıda açıldı. Web sayfası ve dosya kutuları sadece Ekran Bölücü uygulamasında (.exe) çalışır.</div>');
+}
 const sayac = document.getElementById('sayac');
 const KEY = 'ekran-bolucu-kutular';
 
@@ -44,6 +48,8 @@ function kutuOlustur(k) {
   const yenile = el('button', 'ikon', '⟳'); yenile.title = 'Yenile';
   const degistir = el('button', 'ikon', '⇄'); degistir.title = 'İçeriği değiştir';
   const kapat = el('button', 'ikon kapat', '✕'); kapat.title = 'Kutuyu kapat';
+  const notKaydet = el('button', 'ikon', '💾'); notKaydet.title = 'Notu .txt dosyası olarak kaydet';
+  notKaydet.style.display = 'none';
   const ic = el('div', 'kutu-ic');
 
   if (k.tur === 'web' || k.tur === 'dosya') {
@@ -62,6 +68,14 @@ function kutuOlustur(k) {
     ta.oninput = () => { k.deger = ta.value; kaydet(); };
     ic.append(ta);
     yenile.style.display = 'none';
+    notKaydet.style.display = '';
+    baslik.textContent = 'Not (otomatik kaydedilir)';
+    notKaydet.onclick = async () => {
+      try {
+        const yol = await window.api.notKaydet(ta.value, 'not');
+        if (yol) baslik.textContent = 'Kaydedildi: ' + yol;
+      } catch (err) { alert('Not kaydedilemedi: ' + err.message); }
+    };
   } else {
     yenile.style.display = 'none';
     degistir.style.display = 'none';
@@ -71,7 +85,7 @@ function kutuOlustur(k) {
   degistir.onclick = () => { k.tur = null; k.deger = ''; k.baslik = ''; kaydet(); ciz(); };
   kapat.onclick = () => { kutular = kutular.filter(x => x.id !== k.id); kaydet(); ciz(); };
 
-  ust.append(baslik, yenile, degistir, kapat);
+  ust.append(baslik, notKaydet, yenile, degistir, kapat);
   kutu.append(ust, ic);
   return kutu;
 }
