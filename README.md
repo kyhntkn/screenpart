@@ -21,7 +21,7 @@ sonra istediğin zaman listeden seçip aynı düzeni aç. Çöp kutusu simgesiyl
    - `Ekran-Bolucu-Store-*.appx`: Microsoft Store paketi
 
 ## Microsoft Store için
-`package.json` içindeki `build.appx` alanındaki 3 değeri Partner Center'dan al ve değiştir:
+`package.json` içindeki `build.appx` alanındaki 3 değeri (şu an yer tutucu, Store paketi bunlar değişmeden Store'a yüklenemez) Partner Center'dan al ve değiştir:
 `identityName`, `publisher`, `publisherDisplayName`
 (Partner Center > Ürün kimliği sayfasında yazar). Bunlar doğru değilse Store paketi yüklenmez.
 Store'a gönderilen paket Microsoft tarafından imzalanır, ayrıca sertifika gerekmez.
