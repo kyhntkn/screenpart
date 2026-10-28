@@ -116,6 +116,17 @@ function secimEkrani(ic, k) {
     try { r = await window.api.dosyaSec(); }
     catch (err) { alert('Dosya seçici açılamadı: ' + err.message); return; }
     if (!r) return;
+    const uzanti = (r.ad.split('.').pop() || '').toLowerCase();
+    const officeUzantilari = ['doc', 'docx', 'xls', 'xlsx', 'csv', 'ppt', 'pptx', 'odt', 'ods'];
+    if (officeUzantilari.includes(uzanti)) {
+      try {
+        const hata = await window.api.belgeAc(r.yol);
+        if (hata) alert('Belge varsayılan uygulamada açılamadı: ' + hata);
+      } catch (err) {
+        alert('Belge açılamadı: ' + err.message);
+      }
+      return;
+    }
     k.tur = 'dosya'; k.deger = r.url; k.baslik = r.ad; kaydet(); ciz();
   };
   not.onclick = () => { k.tur = 'not'; k.deger = ''; k.baslik = 'Not'; kaydet(); ciz(); };

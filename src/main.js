@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const { pathToFileURL } = require('url');
 const fs = require('fs');
@@ -38,13 +38,20 @@ ipcMain.handle('dosya-sec', async () => {
   const r = await dialog.showOpenDialog({
     properties: ['openFile'],
     filters: [
-      { name: 'Dokümanlar ve medya', extensions: ['pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'txt', 'md', 'html', 'htm', 'mp4', 'webm', 'mp3', 'wav'] },
+      { name: 'Dokümanlar ve medya', extensions: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'ppt', 'pptx', 'odt', 'ods', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'txt', 'md', 'html', 'htm', 'mp4', 'webm', 'mp3', 'wav'] },
       { name: 'Tüm dosyalar', extensions: ['*'] }
     ]
   });
   if (r.canceled || !r.filePaths[0]) return null;
   const p = r.filePaths[0];
-  return { url: pathToFileURL(p).href, ad: path.basename(p) };
+  return { url: pathToFileURL(p).href, ad: path.basename(p), yol: p };
+});
+
+ipcMain.handle('belge-ac', async (_e, dosyaYolu) => {
+  if (typeof dosyaYolu !== 'string' || !path.isAbsolute(dosyaYolu)) {
+    throw new Error('Geçersiz dosya yolu.');
+  }
+  return shell.openPath(dosyaYolu);
 });
 
 ipcMain.handle('not-kaydet', async (_e, metin, ad) => {

@@ -67,7 +67,20 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .ikon:hover { background: var(--cizgi); color: var(--yazi); }
 .ikon.kapat:hover { background: var(--tehlike); color: #fff; }
 .kutu-ic { flex: 1; min-height: 0; position: relative; display: flex; }
-webview { display: flex; flex: 1; width: 100%; height: 100%; border: 0; background: #fff; }
+webview {
+  display: flex;
+  flex: 1 1 0;
+  width: 0;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  border: 0;
+  background: #fff;
+}
+
+/* Web kutusu daraldığında içeriğin kutu ölçülerini doğru kullanmasını sağla. */
+.kutu-ic, .satir, .alan { min-width: 0; }
+.kutu-ic webview { contain: size layout; }
 
 .secim { margin: auto; display: flex; flex-direction: column; gap: 10px; width: min(280px, 85%); }
 .secim p { color: var(--soluk); text-align: center; margin-bottom: 4px; }
