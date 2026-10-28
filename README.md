@@ -3,6 +3,10 @@
 Birden fazla web sayfası, doküman ve notu tek pencerede, ekranı eşit bölen kutularda göster.
 "+" ile kutu ekle, kutuda ne açacağını seç (web sayfası, dosya, not).
 
+## Şablonlar
+Üstteki "Şablonlar" düğmesinden mevcut düzeni (kutular, adresler, dosyalar, notlar) bir adla kaydet,
+sonra istediğin zaman listeden seçip aynı düzeni aç. Çöp kutusu simgesiyle şablon silinir.
+
 ## Çalıştırma (test)
     npm install
     npm start
