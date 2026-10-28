@@ -130,3 +130,26 @@ webview {
 }
 .s-kaydet button { padding: 0 14px; border-radius: 8px; border: 0; background: var(--vurgu); color: #04121f; font-weight: 600; }
 .s-mesaj { color: var(--tehlike); margin-top: 8px; }
+
+
+/* Office belgeleri PDF gibi kutunun içinde görüntülenir. */
+.ofis-goruntuleyici {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  overflow: auto;
+  background: #f5f6f8;
+  color: #20242b;
+}
+.ofis-yukleniyor, .ofis-hata { padding: 18px; color: #454b55; line-height: 1.5; }
+.ofis-hata { color: #a12626; }
+.word-sayfa { min-height: 100%; padding: 12px; overflow: auto; }
+.word-sayfa .docx-wrapper { padding: 0 !important; background: #e7e9ed !important; }
+.word-sayfa .docx-wrapper > section.docx { margin: 0 auto 12px !important; max-width: 100% !important; box-shadow: 0 1px 5px rgba(0,0,0,.18); }
+.excel-araclar { position: sticky; top: 0; z-index: 1; padding: 7px; background: #e9edf2; border-bottom: 1px solid #cbd1da; }
+.excel-sayfa-sec { max-width: 100%; padding: 6px 8px; border: 1px solid #c5ccd6; border-radius: 5px; background: white; color: #20242b; }
+.excel-tablo-alan { overflow: auto; max-width: 100%; }
+.excel-tablo { border-collapse: collapse; background: white; color: #20242b; font: 12px/1.35 "Segoe UI", sans-serif; white-space: pre-wrap; }
+.excel-tablo td, .excel-tablo th { border: 1px solid #d8dde5; padding: 4px 7px; min-width: 55px; max-width: 240px; overflow-wrap: anywhere; }
+.excel-tablo tr:first-child td { background: #edf2f7; font-weight: 600; }

@@ -47,6 +47,18 @@ ipcMain.handle('dosya-sec', async () => {
   return { url: pathToFileURL(p).href, ad: path.basename(p), yol: p };
 });
 
+ipcMain.handle('belge-oku', async (_e, dosyaYolu) => {
+  if (typeof dosyaYolu !== 'string' || !path.isAbsolute(dosyaYolu)) {
+    throw new Error('Geçersiz dosya yolu.');
+  }
+  const uzanti = path.extname(dosyaYolu).slice(1).toLowerCase();
+  const izinli = ['docx', 'xlsx', 'xls', 'csv'];
+  if (!izinli.includes(uzanti)) throw new Error('Bu belge biçimi uygulama içinde görüntülenemiyor.');
+  const stat = fs.statSync(dosyaYolu);
+  if (stat.size > 40 * 1024 * 1024) throw new Error('Dosya 40 MB sınırını aşıyor.');
+  return { uzanti, base64: fs.readFileSync(dosyaYolu).toString('base64') };
+});
+
 ipcMain.handle('belge-ac', async (_e, dosyaYolu) => {
   if (typeof dosyaYolu !== 'string' || !path.isAbsolute(dosyaYolu)) {
     throw new Error('Geçersiz dosya yolu.');

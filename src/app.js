@@ -54,13 +54,43 @@ function kutuOlustur(k) {
 
   if (k.tur === 'web' || k.tur === 'dosya') {
     const wv = document.createElement('webview');
+    const responsiveUA = (width) => {
+      if (width <= 600) return 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36';
+      if (width <= 900) return 'Mozilla/5.0 (Linux; Android 13; SM-X700) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+      return '';
+    };
+    const ilkGenislik = ic.clientWidth || 1000;
+    const ilkUA = responsiveUA(ilkGenislik);
+    if (ilkUA) wv.setAttribute('useragent', ilkUA);
     wv.setAttribute('src', k.deger);
     wv.setAttribute('allowpopups', '');
     wv.addEventListener('page-title-updated', (e) => {
       if (k.tur === 'web') baslik.textContent = e.title;
     });
+    let etkinMod = ilkGenislik <= 600 ? 'mobile' : ilkGenislik <= 900 ? 'tablet' : 'desktop';
+    let sonGenislik = ilkGenislik;
+    const boyutIzleyici = new ResizeObserver(() => {
+      const genislik = ic.clientWidth;
+      if (!genislik) return;
+      sonGenislik = genislik;
+      const yeniMod = genislik <= 600 ? 'mobile' : genislik <= 900 ? 'tablet' : 'desktop';
+      if (yeniMod === etkinMod) return;
+      etkinMod = yeniMod;
+      const ua = responsiveUA(genislik);
+      if (ua) wv.setUserAgent(ua);
+      else wv.setUserAgent(navigator.userAgent);
+      wv.reload();
+    });
+    boyutIzleyici.observe(ic);
     yenile.onclick = () => wv.reload();
     ic.append(wv);
+  } else if (k.tur === 'ofis') {
+    const goruntuleyici = el('div', 'ofis-goruntuleyici');
+    goruntuleyici.append(el('div', 'ofis-yukleniyor', 'Belge açılıyor…'));
+    ic.append(goruntuleyici);
+    yenile.onclick = () => belgeKutudaGoster(goruntuleyici, k.deger);
+    belgeKutudaGoster(goruntuleyici, k.deger);
+
   } else if (k.tur === 'not') {
     const ta = el('textarea', 'not-alan');
     ta.placeholder = 'Notunu buraya yaz…';
@@ -90,6 +120,46 @@ function kutuOlustur(k) {
   return kutu;
 }
 
+async function belgeKutudaGoster(kapsayici, dosyaYolu) {
+  kapsayici.replaceChildren(el('div', 'ofis-yukleniyor', 'Belge açılıyor…'));
+  try {
+    const belge = await window.api.belgeOku(dosyaYolu);
+    const binary = atob(belge.base64);
+    const baytlar = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) baytlar[i] = binary.charCodeAt(i);
+    kapsayici.replaceChildren();
+    if (belge.uzanti === 'docx') {
+      const sayfa = el('div', 'word-sayfa');
+      kapsayici.append(sayfa);
+      await window.docx.renderAsync(baytlar.buffer, sayfa, null, {
+        className: 'docx', inWrapper: true, ignoreWidth: false,
+        ignoreHeight: true, breakPages: true, ignoreLastRenderedPageBreak: true
+      });
+    } else {
+      const kitap = window.XLSX.read(baytlar, { type: 'array' });
+      const seciciSatiri = el('div', 'excel-araclar');
+      const secici = el('select', 'excel-sayfa-sec');
+      for (const ad of kitap.SheetNames) {
+        const secenek = el('option', '', ad); secenek.value = ad; secici.append(secenek);
+      }
+      const tabloAlan = el('div', 'excel-tablo-alan');
+      const tabloCiz = () => {
+        tabloAlan.replaceChildren();
+        const ws = kitap.Sheets[secici.value];
+        const html = window.XLSX.utils.sheet_to_html(ws, { header: '', editable: false });
+        const gecici = document.createElement('div'); gecici.innerHTML = html;
+        const tablo = gecici.querySelector('table');
+        if (tablo) { tablo.className = 'excel-tablo'; tabloAlan.append(tablo); }
+        else tabloAlan.append(el('div', 'ofis-yukleniyor', 'Bu sayfada görüntülenecek veri yok.'));
+      };
+      secici.onchange = tabloCiz;
+      seciciSatiri.append(secici); kapsayici.append(seciciSatiri, tabloAlan); tabloCiz();
+    }
+  } catch (err) {
+    kapsayici.replaceChildren(el('div', 'ofis-hata', 'Belge kutu içinde görüntülenemedi: ' + (err.message || err)));
+  }
+}
+
 function secimEkrani(ic, k) {
   const s = el('div', 'secim');
   s.append(el('p', '', 'Bu kutuda ne açılsın?'));
@@ -117,14 +187,14 @@ function secimEkrani(ic, k) {
     catch (err) { alert('Dosya seçici açılamadı: ' + err.message); return; }
     if (!r) return;
     const uzanti = (r.ad.split('.').pop() || '').toLowerCase();
-    const officeUzantilari = ['doc', 'docx', 'xls', 'xlsx', 'csv', 'ppt', 'pptx', 'odt', 'ods'];
-    if (officeUzantilari.includes(uzanti)) {
-      try {
-        const hata = await window.api.belgeAc(r.yol);
-        if (hata) alert('Belge varsayılan uygulamada açılamadı: ' + hata);
-      } catch (err) {
-        alert('Belge açılamadı: ' + err.message);
-      }
+    const kutudaAc = ['docx', 'xlsx', 'xls', 'csv'];
+    if (kutudaAc.includes(uzanti)) {
+      k.tur = 'ofis'; k.deger = r.yol; k.baslik = r.ad; kaydet(); ciz();
+      return;
+    }
+    const eskiOffice = ['doc', 'ppt', 'pptx', 'odt', 'ods'];
+    if (eskiOffice.includes(uzanti)) {
+      alert('Bu dosya biçimi henüz kutu içinde görüntülenemiyor. DOCX veya XLSX biçiminde kaydedip tekrar deneyin.');
       return;
     }
     k.tur = 'dosya'; k.deger = r.url; k.baslik = r.ad; kaydet(); ciz();
