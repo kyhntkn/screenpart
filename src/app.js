@@ -104,6 +104,12 @@ function kutuOlustur(k) {
       zaman = setTimeout(uygula, basladi ? 300 : 0);
     }).observe(ic);
     wv.addEventListener('page-title-updated', (e) => { baslik.textContent = e.title; });
+    const adresKaydet = (e) => {
+      if (e.isMainFrame === false || !/^https?:/i.test(e.url)) return;
+      k.deger = e.url; kaydet();
+    };
+    wv.addEventListener('did-navigate', adresKaydet);
+    wv.addEventListener('did-navigate-in-page', adresKaydet);
     yenile.onclick = () => wv.reload();
     ic.append(wv);
     webviewBoyutla(wv, ic);
@@ -147,7 +153,7 @@ function kutuOlustur(k) {
     secimEkrani(ic, k);
   }
 
-  degistir.onclick = () => { k.tur = null; k.deger = ''; k.baslik = ''; kaydet(); ciz(); };
+  degistir.onclick = () => { k.tur = null; k.deger = ''; k.baslik = ''; kaydet(); kutuSifirla(k); };
   kapat.onclick = () => { kutular = kutular.filter(x => x.id !== k.id); kaydet(); ciz(); };
 
   ust.append(baslik, rozet, notKaydet, yenile, degistir, kapat);
@@ -170,7 +176,7 @@ function secimEkrani(ic, k) {
     const ac = () => {
       const url = adresDuzelt(inp.value);
       if (!url) return;
-      k.tur = 'web'; k.deger = url; k.baslik = url; kaydet(); ciz();
+      k.tur = 'web'; k.deger = url; k.baslik = url; kaydet(); kutuSifirla(k);
     };
     git.onclick = ac;
     inp.onkeydown = (e) => { if (e.key === 'Enter') ac(); };
@@ -181,29 +187,64 @@ function secimEkrani(ic, k) {
     try { r = await window.api.dosyaSec(); }
     catch (err) { alert('Dosya seçici açılamadı: ' + err.message); return; }
     if (!r) return;
-    k.tur = 'dosya'; k.deger = r.url; k.baslik = r.ad; kaydet(); ciz();
+    k.tur = 'dosya'; k.deger = r.url; k.baslik = r.ad; kaydet(); kutuSifirla(k);
   };
-  not.onclick = () => { k.tur = 'not'; k.deger = ''; k.baslik = 'Not'; kaydet(); ciz(); };
+  not.onclick = () => { k.tur = 'not'; k.deger = ''; k.baslik = 'Not'; kaydet(); kutuSifirla(k); };
 
   s.append(web, dosya, not);
   ic.append(s);
 }
 
+const dugumler = new Map(); // kutu id -> DOM düğümü (web sayfaları yeniden yüklenmesin diye korunur)
+const ebob = (x, y) => (y ? ebob(y, x % y) : x);
+const ekok = (x, y) => (x / ebob(x, y)) * y;
+
+function kutuSifirla(k) {
+  const n = dugumler.get(k.id);
+  if (n) { n.remove(); dugumler.delete(k.id); }
+  ciz();
+}
+
 function ciz() {
-  alan.replaceChildren();
   sayac.textContent = kutular.length ? kutular.length + ' kutu' : '';
+  const eskiBos = alan.querySelector(':scope > .bos-alan');
+
   if (!kutular.length) {
-    const b = el('div', 'bos');
-    b.append(el('b', '', 'Henüz kutu yok'), document.createElement('br'), 'Sağ üstteki + düğmesiyle kutu ekle veya Şablonlar\'dan kayıtlı bir düzeni aç.');
-    alan.append(b);
+    for (const n of dugumler.values()) n.remove();
+    dugumler.clear();
+    if (!eskiBos) {
+      const b = el('div', 'bos bos-alan');
+      b.append(el('b', '', 'Henüz kutu yok'), document.createElement('br'), 'Sağ üstteki + düğmesiyle kutu ekle veya Şablonlar\'dan kayıtlı bir düzeni aç.');
+      alan.append(b);
+    }
+    alan.style.gridTemplateColumns = '';
+    alan.style.gridTemplateRows = '';
     return;
   }
-  let i = 0;
-  for (const adet of satirlar(kutular.length)) {
-    const satir = el('div', 'satir');
-    for (let j = 0; j < adet; j++) satir.append(kutuOlustur(kutular[i++]));
-    alan.append(satir);
+  if (eskiBos) eskiBos.remove();
+
+  const var_ = new Set(kutular.map((k) => k.id));
+  for (const [id, n] of dugumler) {
+    if (!var_.has(id)) { n.remove(); dugumler.delete(id); }
   }
+
+  // Satırlar farklı sayıda kutu içerebilir: ortak kolon sayısı = EKOK
+  const dagilim = satirlar(kutular.length);
+  const L = dagilim.reduce(ekok, 1);
+  alan.style.gridTemplateColumns = 'repeat(' + L + ', minmax(0, 1fr))';
+  alan.style.gridTemplateRows = 'repeat(' + dagilim.length + ', minmax(0, 1fr))';
+
+  let i = 0;
+  dagilim.forEach((adet, r) => {
+    const span = L / adet;
+    for (let j = 0; j < adet; j++) {
+      const k = kutular[i++];
+      let n = dugumler.get(k.id);
+      if (!n) { n = kutuOlustur(k); dugumler.set(k.id, n); alan.append(n); }
+      n.style.gridRow = String(r + 1);
+      n.style.gridColumn = (j * span + 1) + ' / span ' + span;
+    }
+  });
 }
 
 document.getElementById('ekle').onclick = () => {

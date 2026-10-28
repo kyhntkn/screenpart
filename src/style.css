@@ -42,8 +42,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .ekle:hover { filter: brightness(1.1); }
 .ekle:active { transform: scale(.94); }
 
-.alan { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 6px; padding: 6px; }
-.satir { flex: 1; min-height: 0; display: flex; gap: 6px; }
+.alan { flex: 1; min-height: 0; display: grid; gap: 6px; padding: 6px; }
 .kutu {
   flex: 1; min-width: 0; min-height: 0;
   display: flex; flex-direction: column;
