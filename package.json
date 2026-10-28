@@ -1,0 +1,46 @@
+{
+  "name": "ekran-bolucu",
+  "productName": "Ekran Bölücü",
+  "version": "1.0.0",
+  "description": "Birden fazla web sayfası, doküman ve notu tek ekranda eşit bölünmüş kutularda göster.",
+  "main": "src/main.js",
+  "author": "Ekran Bölücü",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --publish never"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.ekranbolucu.app",
+    "productName": "Ekran Bölücü",
+    "directories": { "output": "dist", "buildResources": "build" },
+    "files": ["src/**/*", "package.json"],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] },
+        { "target": "appx", "arch": ["x64"] }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "Ekran-Bolucu-Kurulum-${version}.${ext}"
+    },
+    "portable": { "artifactName": "Ekran-Bolucu-Tasinabilir-${version}.${ext}" },
+    "appx": {
+      "applicationId": "EkranBolucu",
+      "displayName": "Ekran Bölücü",
+      "identityName": "BURAYA_PARTNER_CENTER_IDENTITY_NAME",
+      "publisher": "CN=BURAYA_PARTNER_CENTER_PUBLISHER_ID",
+      "publisherDisplayName": "BURAYA_YAYINCI_ADI",
+      "languages": ["tr-TR"],
+      "artifactName": "Ekran-Bolucu-Store-${version}.${ext}"
+    }
+  }
+}
