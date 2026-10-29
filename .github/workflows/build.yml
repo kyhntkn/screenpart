@@ -16,10 +16,22 @@ jobs:
       - run: npm install
       - name: Exe derle (kurulum + taşınabilir)
         run: npm run dist
+      - name: Word ve Excel kütüphaneleri pakete girdi mi kontrol et
+        shell: pwsh
+        run: |
+          $liste = npx --yes @electron/asar list dist/win-unpacked/resources/app.asar
+          foreach ($m in 'mammoth', 'xlsx') {
+            if (-not ($liste | Select-String -Pattern "node_modules.$m.package\.json")) {
+              Write-Error "$m pakete girmemis. package.json icindeki dependencies bolumunu kontrol et."
+              exit 1
+            }
+            Write-Host "$m pakette var"
+          }
       - name: Store paketi derle (.appx)
         run: npm run dist:store
         continue-on-error: true
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: ekran-bolucu-windows
           path: |
