@@ -3,9 +3,16 @@
 Birden fazla web sayfası, doküman ve notu tek pencerede, ekranı eşit bölen kutularda göster.
 "+" ile kutu ekle, kutuda ne açacağını seç (web sayfası, dosya, not).
 
+## Görünüm ve belgeler
+- Web kutuları kendi genişliğine göre masaüstü (900 px üstü), tablet (520-900 px) veya mobil görünümde açılır; kutu küçülüp büyüyünce görünüm otomatik değişir.
+- PDF, resim, video, metin, Word (.docx) ve Excel (.xlsx, .xls, .csv) kutuda açılır. Word/Excel dosyaları salt okunur gösterilir.
+
 ## Şablonlar
 Üstteki "Şablonlar" düğmesinden mevcut düzeni (kutular, adresler, dosyalar, notlar) bir adla kaydet,
 sonra istediğin zaman listeden seçip aynı düzeni aç. Çöp kutusu simgesiyle şablon silinir.
+
+## Desteklenen dosyalar
+PDF, resim, video, metin, Word (.docx) ve Excel (.xlsx, .xls, .csv) kutuda açılır. Eski .doc için uyarı çıkar (.docx veya PDF olarak kaydedip aç).
 
 ## Çalıştırma (test)
     npm install
