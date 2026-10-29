@@ -13,7 +13,7 @@ function createWindow() {
     minWidth: 700,
     minHeight: 480,
     backgroundColor: '#14161a',
-    title: 'Ekran Bölücü',
+    title: 'Screen Split',
     icon: path.join(__dirname, '..', 'build', 'icon.ico'),
     autoHideMenuBar: true,
     webPreferences: {

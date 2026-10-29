@@ -1,7 +1,7 @@
 const alan = document.getElementById('alan');
 if (!window.api) {
   document.body.insertAdjacentHTML('afterbegin',
-    '<div style="background:#ff6b6b;color:#fff;padding:8px 14px">Bu sayfa tarayıcıda açıldı. Web sayfası ve dosya kutuları sadece Ekran Bölücü uygulamasında (.exe) çalışır.</div>');
+    '<div style="background:#ff6b6b;color:#fff;padding:8px 14px">Bu sayfa tarayıcıda açıldı. Web sayfası ve dosya kutuları sadece Screen Split uygulamasında (.exe) çalışır.</div>');
 }
 const sayac = document.getElementById('sayac');
 const KEY = 'ekran-bolucu-kutular';
