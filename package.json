@@ -1,10 +1,10 @@
 {
-  "name": "ekran-bolucu",
-  "productName": "Ekran Bölücü",
+  "name": "screen-split",
+  "productName": "Screen Split",
   "version": "1.0.0",
   "description": "Birden fazla web sayfası, doküman ve notu tek ekranda eşit bölünmüş kutularda göster.",
   "main": "src/main.js",
-  "author": "Ekran Bölücü",
+  "author": "Kayhan TEKİN",
   "license": "MIT",
   "scripts": {
     "start": "electron .",
@@ -16,8 +16,8 @@
     "electron-builder": "^25.1.8"
   },
   "build": {
-    "appId": "com.ekranbolucu.app",
-    "productName": "Ekran Bölücü",
+    "appId": "com.kayhantekin.screensplit",
+    "productName": "Screen Split",
     "directories": {
       "output": "dist",
       "buildResources": "build"
@@ -53,21 +53,21 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "Ekran-Bolucu-Kurulum-${version}.${ext}"
+      "artifactName": "Screen-Split-Kurulum-${version}.${ext}"
     },
     "portable": {
-      "artifactName": "Ekran-Bolucu-Tasinabilir-${version}.${ext}"
+      "artifactName": "Screen-Split-Tasinabilir-${version}.${ext}"
     },
     "appx": {
-      "applicationId": "EkranBolucu",
-      "displayName": "Ekran Bölücü",
-      "identityName": "Placeholder.EkranBolucu",
-      "publisher": "CN=Placeholder",
-      "publisherDisplayName": "Ekran Bolucu",
+      "applicationId": "ScreenSplit",
+      "displayName": "Screen Split",
+      "identityName": "KayhanTEKN.ScreenSplit",
+      "publisher": "CN=A94C9337-5C18-44C3-9DCE-433C130AD6A2",
+      "publisherDisplayName": "Kayhan TEKİN",
       "languages": [
         "tr-TR"
       ],
-      "artifactName": "Ekran-Bolucu-Store-${version}.${ext}"
+      "artifactName": "Screen-Split-Store-${version}.${ext}"
     }
   },
   "dependencies": {
