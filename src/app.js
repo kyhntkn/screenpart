@@ -54,6 +54,12 @@ function kategoriBul(w, onceki) {
   if (onceki && ham !== onceki && Math.min(Math.abs(w - 900), Math.abs(w - 520)) < 30) return onceki; // titremeyi önle
   return ham;
 }
+const OFIS = [
+  ['📘  Word', 'https://www.office.com/launch/word', 'Word Online'],
+  ['📗  Excel', 'https://www.office.com/launch/excel', 'Excel Online'],
+  ['📙  PowerPoint', 'https://www.office.com/launch/powerpoint', 'PowerPoint Online'],
+  ['☁️  OneDrive dosyalarım', 'https://onedrive.live.com/', 'OneDrive']
+];
 const BELGE_RE = /\.(docx?|xlsx|xlsm|xls|csv)$/i;
 
 // Kutu boyutu değişince sayfanın görünüm alanını da aynı boyuta getir
@@ -76,17 +82,20 @@ function kutuOlustur(k) {
   const kapat = el('button', 'ikon kapat', '✕'); kapat.title = 'Kutuyu kapat';
   const notKaydet = el('button', 'ikon', '💾'); notKaydet.title = 'Notu .txt dosyası olarak kaydet';
   notKaydet.style.display = 'none';
+  const duzenle = el('button', 'ikon', '✏️'); duzenle.title = "Office Online'da düzenle";
+  duzenle.style.display = 'none';
   const ic = el('div', 'kutu-ic');
 
   if (k.tur === 'web') {
     const wv = document.createElement('webview');
     wv.setAttribute('allowpopups', '');
+    wv.setAttribute('partition', 'persist:ekran'); // girişler uygulama kapanınca da kalsın
     let kat = null, basladi = false, zaman = null;
     const uygula = () => {
       const w = ic.clientWidth;
       if (!w) return;
-      const yeni = kategoriBul(w, kat);
-      rozet.textContent = ETIKET[yeni];
+      const yeni = k.ofis ? 'masaustu' : kategoriBul(w, kat);
+      rozet.textContent = k.ofis ? 'Office' : ETIKET[yeni];
       if (!basladi) {
         basladi = true; kat = yeni;
         wv.setAttribute('useragent', UA[yeni]);
@@ -123,6 +132,13 @@ function kutuOlustur(k) {
       return wv;
     };
     if (BELGE_RE.test(k.deger)) {
+      duzenle.style.display = '';
+      duzenle.onclick = async () => {
+        try { await window.api.dosyaGoster(k.deger); } catch {}
+        alert("Dosya, Explorer'da seçili olarak açıldı.\n\n1) Açılan OneDrive sayfasında Microsoft hesabınla giriş yap.\n2) Dosyayı Explorer'dan bu kutuya sürükleyip bırak (yüklenir).\n3) Yüklenen dosyaya çift tıkla: Word/Excel Online'da düzenlenir, değişiklikler otomatik kaydedilir.");
+        k.tur = 'web'; k.ofis = true; k.deger = 'https://onedrive.live.com/'; k.baslik = 'OneDrive';
+        kaydet(); kutuSifirla(k);
+      };
       ic.append(el('div', 'bos', 'Belge hazırlanıyor…'));
       window.api.belgeDonustur(k.deger).then((r) => {
         ic.replaceChildren();
@@ -156,7 +172,7 @@ function kutuOlustur(k) {
   degistir.onclick = () => { k.tur = null; k.deger = ''; k.baslik = ''; kaydet(); kutuSifirla(k); };
   kapat.onclick = () => { kutular = kutular.filter(x => x.id !== k.id); kaydet(); ciz(); };
 
-  ust.append(baslik, rozet, notKaydet, yenile, degistir, kapat);
+  ust.append(baslik, rozet, duzenle, notKaydet, yenile, degistir, kapat);
   kutu.append(ust, ic);
   return kutu;
 }
@@ -166,6 +182,7 @@ function secimEkrani(ic, k) {
   s.append(el('p', '', 'Bu kutuda ne açılsın?'));
   const web = el('button', '', '🌐  Web sayfası');
   const dosya = el('button', '', '📄  Doküman veya dosya');
+  const ofis = el('button', '', '🧩  Office Online (Word, Excel…)');
   const not = el('button', '', '📝  Not defteri');
 
   web.onclick = () => {
@@ -189,9 +206,20 @@ function secimEkrani(ic, k) {
     if (!r) return;
     k.tur = 'dosya'; k.deger = r.url; k.baslik = r.ad; kaydet(); kutuSifirla(k);
   };
+  ofis.onclick = () => {
+    ic.replaceChildren();
+    const m = el('div', 'secim');
+    m.append(el('p', '', "Microsoft hesabınla giriş yapman gerekir"));
+    for (const [yazi, url, ad] of OFIS) {
+      const b = el('button', '', yazi);
+      b.onclick = () => { k.tur = 'web'; k.ofis = true; k.deger = url; k.baslik = ad; kaydet(); kutuSifirla(k); };
+      m.append(b);
+    }
+    ic.append(m);
+  };
   not.onclick = () => { k.tur = 'not'; k.deger = ''; k.baslik = 'Not'; kaydet(); kutuSifirla(k); };
 
-  s.append(web, dosya, not);
+  s.append(web, dosya, ofis, not);
   ic.append(s);
 }
 
@@ -291,7 +319,7 @@ function panelCiz(mesaj) {
   const btn = el('button', '', 'Kaydet');
   const kaydetSablon = () => {
     const ad = inp.value.trim();
-    const dolu = kutular.filter(k => k.tur).map(({ tur, deger, baslik }) => ({ tur, deger, baslik }));
+    const dolu = kutular.filter(k => k.tur).map(({ tur, deger, baslik, ofis }) => ({ tur, deger, baslik, ofis }));
     if (!dolu.length) return panelCiz('Kaydedilecek dolu kutu yok.');
     if (!ad) return panelCiz('Şablona bir ad ver.');
     const var_ = sablonlar.find(x => x.ad.toLowerCase() === ad.toLowerCase());

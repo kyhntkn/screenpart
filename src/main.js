@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const { pathToFileURL } = require('url');
 const fs = require('fs');
@@ -97,6 +97,10 @@ ipcMain.handle('belge-donustur', async (_e, fileUrl) => {
   } catch (err) {
     return { hata: 'Belge açılamadı: ' + err.message };
   }
+});
+
+ipcMain.handle('dosya-goster', (_e, fileUrl) => {
+  shell.showItemInFolder(fileURLToPath(fileUrl));
 });
 
 ipcMain.handle('not-kaydet', async (_e, metin, ad) => {
